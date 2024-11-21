@@ -22,8 +22,9 @@ namespace SHtoolsESP32
     extern bool HabilitarDebug;
 
     void setup(int _ledPin, int _buttonPin, String _nomeSketch,
-               bool *ptrBanheiraLed_ON = nullptr,
-               bool *ptrBanheiraLed_ON_viaEspNow = nullptr);
+               bool *_BanheiraLed_ON = nullptr,
+               bool *_BanheiraLed_ON_viaEspNow = nullptr,
+               funcao_led_banheira _led_banheira = nullptr);
 
     namespace Servidor
     {
@@ -56,6 +57,11 @@ namespace SHtoolsESP32
         void EspNow_CallbackReceber(const uint8_t *peer, const uint8_t *incomingData, int len);
         int processarComando(const char *msgRecebida);
         void dividirString(const String &str, char sep, std::vector<String> &partes);
+        int getBanheiraLed_ON();
+        int getBanheiraLed_ON_viaEspNow();
+        void setBanheiraLed_ON(bool value);
+        void setBanheiraLed_ON_viaEspNow(bool value);
+        void chamarLedBanheira(bool _alterar, bool _fromEspNow); // Declaração de funções para usar os ponteiros
     }
 
     namespace Auxiliares

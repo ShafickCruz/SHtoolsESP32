@@ -23,6 +23,10 @@ namespace SHtoolsESP32
   int ledPin;
   int buttonPin;
   String nomeSketch;
+  static bool *BanheiraLed_ON = nullptr;           // Ponteiro para a variável
+  static bool *BanheiraLed_ON_viaEspNow = nullptr; // Ponteiro para a variável
+  typedef void (*funcao_led_banheira)(bool, bool); // Declaração do tipo de ponteiro para função
+  static funcao_led_banheira led_banheira;         // Ponteiro para a função
 
   // geral
   bool WIFIradio_OFF = true;
@@ -45,11 +49,16 @@ namespace SHtoolsESP32
   /// @param _ledPin
   /// @param _buttonPin
   /// @param _nomeSketch
-  void setup(int _ledPin, int _buttonPin, String _nomeSketch, bool *_BanheiraLed_ON, bool *_BanheiraLed_ON_viaEspNow)
+  void setup(int _ledPin, int _buttonPin, String _nomeSketch,
+             bool *_BanheiraLed_ON, bool *_BanheiraLed_ON_viaEspNow,
+             funcao_led_banheira _led_banheira)
   {
     ledPin = _ledPin;
     buttonPin = _buttonPin;
     nomeSketch = _nomeSketch;
+    BanheiraLed_ON = _BanheiraLed_ON;
+    BanheiraLed_ON_viaEspNow = _BanheiraLed_ON_viaEspNow;
+    led_banheira = _led_banheira;
 
     // Configura os pinos de I/O
     pinMode(ledPin, OUTPUT);
@@ -1146,9 +1155,6 @@ namespace SHtoolsESP32
       valores -1 ou "" serão ignorados
       */
 
-      // printDEBUG("ANTES - BANHEIRA LED: " + String(banheiraLed_ON));
-      // printDEBUG("ANTES - BANHEIRA LED ESPNOW: " + String(banheiraLed_ON_viaEspNow));
-
       String msgString(msgRecebida);
 
       // Verifica se há o identificador de comando no inicio da mensagem
@@ -1200,13 +1206,20 @@ namespace SHtoolsESP32
             }
             else
             {
-              // recebido do esp32 da banheira para atualizar os estados das variaveis
-              banheiraLed_ON = comando.arg1;
-              banheiraLed_ON_viaEspNow = comando.arg2;
-            }
+              // recebido do esp32 da banheira/banheiro para atualizar os estados das variaveis
+              // se o valor for nulo (-1 = nullptr) significa que a variável não esta sendo usada e deve ser ignorada
+              if (getBanheiraLed_ON() != -1)
+              {
+                Auxiliares::printDEBUG("BANHEIRA LED: " + String(*BanheiraLed_ON));
+                setBanheiraLed_ON(comando.arg1);
+              }
 
-            Auxiliares::printDEBUG("DEPOIS - BANHEIRA LED: " + String(banheiraLed_ON));
-            Auxiliares::printDEBUG("DEPOIS - BANHEIRA LED ESPNOW: " + String(banheiraLed_ON_viaEspNow));
+              if (getBanheiraLed_ON_viaEspNow() != -1)
+              {
+                Auxiliares::printDEBUG("BANHEIRA LED: " + String(*BanheiraLed_ON_viaEspNow));
+                setBanheiraLed_ON_viaEspNow(comando.arg2);
+              }
+            }
 
             return 1; // Sucesso
 
@@ -1216,9 +1229,6 @@ namespace SHtoolsESP32
         }
         return -1; // Erro: O formato da mensagem de comando é inválido
       }
-
-      Auxiliares::printDEBUG("DEPOIS - BANHEIRA LED: " + String(banheiraLed_ON));
-      Auxiliares::printDEBUG("DEPOIS - BANHEIRA LED ESPNOW: " + String(banheiraLed_ON_viaEspNow));
 
       return -2;
     }
@@ -1238,6 +1248,62 @@ namespace SHtoolsESP32
         startPos = pos + 1;
       }
       partes.push_back(str.substring(startPos)); // Adiciona a última parte
+    }
+  }
+
+  /// @brief Função getter para variável BanheiraLed_ON acessada por ponteiro
+  /// @return 0 = false, 1 = true, -1 = ignorar
+  int getBanheiraLed_ON()
+  {
+    if (BanheiraLed_ON != nullptr)
+    {
+      return *BanheiraLed_ON;
+    }
+    else
+    {
+      return -1;
+    }
+  }
+
+  /// @brief Função getter para variável BanheiraLed_ON_viaEspNow acessada por ponteiro
+  /// @return 0 = false, 1 = true, -1 = ignorar
+  int getBanheiraLed_ON_viaEspNow()
+  {
+    if (BanheiraLed_ON_viaEspNow != nullptr)
+    {
+      return *BanheiraLed_ON_viaEspNow;
+    }
+    else
+    {
+      return -1;
+    }
+  }
+
+  /// @brief Função setter para variável BanheiraLed_ON acessada por ponteiro
+  /// @param value True/False
+  void setBanheiraLed_ON(bool value)
+  {
+    if (getBanheiraLed_ON != nullptr)
+    {
+      *BanheiraLed_ON = value;
+    }
+  }
+
+  /// @brief Função setter BanheiraLed_ON_viaEspNow para variável acessada por ponteiro
+  /// @param value True/False
+  void setBanheiraLed_ON_viaEspNow(bool value)
+  {
+    if (getBanheiraLed_ON_viaEspNow != nullptr)
+    {
+      *BanheiraLed_ON_viaEspNow = value;
+    }
+  }
+
+  void chamarLedBanheira(bool _alterar, bool _fromEspNow)
+  {
+    if (led_banheira)
+    {
+      led_banheira(_alterar, _fromEspNow); // Chama a função led_banheira via ponteiro
     }
   }
 

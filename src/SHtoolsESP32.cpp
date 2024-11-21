@@ -25,7 +25,6 @@ namespace SHtoolsESP32
   String nomeSketch;
   static bool *BanheiraLed_ON = nullptr;           // Ponteiro para a variável
   static bool *BanheiraLed_ON_viaEspNow = nullptr; // Ponteiro para a variável
-  typedef void (*funcao_led_banheira)(bool, bool); // Declaração do tipo de ponteiro para função
   static funcao_led_banheira led_banheira;         // Ponteiro para a função
 
   // geral
@@ -1255,13 +1254,13 @@ namespace SHtoolsESP32
   /// @return 0 = false, 1 = true, -1 = ignorar
   int getBanheiraLed_ON()
   {
-    if (BanheiraLed_ON != nullptr)
+    if (BanheiraLed_ON != nullptr) // Verifica se o ponteiro é nulo
     {
-      return *BanheiraLed_ON;
+      return *BanheiraLed_ON; // Retorna o valor da variável
     }
     else
     {
-      return -1;
+      return -1; // Retorna -1 se o ponteiro for nulo
     }
   }
 
@@ -1269,13 +1268,13 @@ namespace SHtoolsESP32
   /// @return 0 = false, 1 = true, -1 = ignorar
   int getBanheiraLed_ON_viaEspNow()
   {
-    if (BanheiraLed_ON_viaEspNow != nullptr)
+    if (BanheiraLed_ON_viaEspNow != nullptr) // Verifica se o ponteiro é nulo
     {
-      return *BanheiraLed_ON_viaEspNow;
+      return *BanheiraLed_ON_viaEspNow; // Retorna o valor da variável
     }
     else
     {
-      return -1;
+      return -1; // Retorna -1 se o ponteiro for nulo
     }
   }
 
@@ -1283,9 +1282,9 @@ namespace SHtoolsESP32
   /// @param value True/False
   void setBanheiraLed_ON(bool value)
   {
-    if (getBanheiraLed_ON != nullptr)
+    if (BanheiraLed_ON != nullptr) // Verifica se o ponteiro é nulo
     {
-      *BanheiraLed_ON = value;
+      *BanheiraLed_ON = value; // Modifica o valor da variável
     }
   }
 
@@ -1293,9 +1292,9 @@ namespace SHtoolsESP32
   /// @param value True/False
   void setBanheiraLed_ON_viaEspNow(bool value)
   {
-    if (getBanheiraLed_ON_viaEspNow != nullptr)
+    if (BanheiraLed_ON_viaEspNow != nullptr) // Verifica se o ponteiro é nulo
     {
-      *BanheiraLed_ON_viaEspNow = value;
+      *BanheiraLed_ON_viaEspNow = value; // Modifica o valor da variável
     }
   }
 

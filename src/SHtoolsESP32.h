@@ -17,12 +17,18 @@
 #include <pgmspace.h> // Necessário para PROGMEM que esta sendo definido dentro dos arquivos binarios do webserver
 #include <esp_now.h>
 
+int getBanheiraLed_ON();
+int getBanheiraLed_ON_viaEspNow();
+void setBanheiraLed_ON(bool value);
+void setBanheiraLed_ON_viaEspNow(bool value);
+void chamarLedBanheira(bool _alterar, bool _fromEspNow); // Declaração de funções para usar os ponteiros
+static bool *BanheiraLed_ON = nullptr;                   // Ponteiro para a variável
+static bool *BanheiraLed_ON_viaEspNow = nullptr;         // Ponteiro para a variável
+typedef void (*funcao_led_banheira)(bool, bool);         // Declaração do tipo de ponteiro para função
+
 namespace SHtoolsESP32
 {
     extern bool HabilitarDebug;
-    static bool *BanheiraLed_ON = nullptr;           // Ponteiro para a variável
-    static bool *BanheiraLed_ON_viaEspNow = nullptr; // Ponteiro para a variável
-    typedef void (*funcao_led_banheira)(bool, bool); // Declaração do tipo de ponteiro para função
 
     void setup(int _ledPin, int _buttonPin, String _nomeSketch,
                bool *_BanheiraLed_ON = nullptr,
@@ -60,11 +66,6 @@ namespace SHtoolsESP32
         void EspNow_CallbackReceber(const uint8_t *peer, const uint8_t *incomingData, int len);
         int processarComando(const char *msgRecebida);
         void dividirString(const String &str, char sep, std::vector<String> &partes);
-        int getBanheiraLed_ON();
-        int getBanheiraLed_ON_viaEspNow();
-        void setBanheiraLed_ON(bool value);
-        void setBanheiraLed_ON_viaEspNow(bool value);
-        void chamarLedBanheira(bool _alterar, bool _fromEspNow); // Declaração de funções para usar os ponteiros
     }
 
     namespace Auxiliares

@@ -12,6 +12,66 @@
 #include "sha_js.h"
 #include "style_css.h"
 
+
+static funcao_led_banheira led_banheira;         // Ponteiro para a função
+
+/// @brief Função getter para variável BanheiraLed_ON acessada por ponteiro
+  /// @return 0 = false, 1 = true, -1 = ignorar
+  int getBanheiraLed_ON()
+  {
+    if (BanheiraLed_ON != nullptr) // Verifica se o ponteiro é nulo
+    {
+      return *BanheiraLed_ON; // Retorna o valor da variável
+    }
+    else
+    {
+      return -1; // Retorna -1 se o ponteiro for nulo
+    }
+  }
+
+  /// @brief Função getter para variável BanheiraLed_ON_viaEspNow acessada por ponteiro
+  /// @return 0 = false, 1 = true, -1 = ignorar
+  int getBanheiraLed_ON_viaEspNow()
+  {
+    if (BanheiraLed_ON_viaEspNow != nullptr) // Verifica se o ponteiro é nulo
+    {
+      return *BanheiraLed_ON_viaEspNow; // Retorna o valor da variável
+    }
+    else
+    {
+      return -1; // Retorna -1 se o ponteiro for nulo
+    }
+  }
+
+  /// @brief Função setter para variável BanheiraLed_ON acessada por ponteiro
+  /// @param value True/False
+  void setBanheiraLed_ON(bool value)
+  {
+    if (BanheiraLed_ON != nullptr) // Verifica se o ponteiro é nulo
+    {
+      *BanheiraLed_ON = value; // Modifica o valor da variável
+    }
+  }
+
+  /// @brief Função setter BanheiraLed_ON_viaEspNow para variável acessada por ponteiro
+  /// @param value True/False
+  void setBanheiraLed_ON_viaEspNow(bool value)
+  {
+    if (BanheiraLed_ON_viaEspNow != nullptr) // Verifica se o ponteiro é nulo
+    {
+      *BanheiraLed_ON_viaEspNow = value; // Modifica o valor da variável
+    }
+  }
+
+  void chamarLedBanheira(bool _alterar, bool _fromEspNow)
+  {
+    if (led_banheira)
+    {
+      led_banheira(_alterar, _fromEspNow); // Chama a função led_banheira via ponteiro
+    }
+  }
+
+
 // ****************************************************
 // ****************** SHtoolsESP32 ********************
 // ****************************************************
@@ -23,7 +83,7 @@ namespace SHtoolsESP32
   int ledPin;
   int buttonPin;
   String nomeSketch;
-  static funcao_led_banheira led_banheira;         // Ponteiro para a função
+  
 
   // geral
   bool WIFIradio_OFF = true;
@@ -1248,61 +1308,7 @@ namespace SHtoolsESP32
     }
   }
 
-  /// @brief Função getter para variável BanheiraLed_ON acessada por ponteiro
-  /// @return 0 = false, 1 = true, -1 = ignorar
-  int getBanheiraLed_ON()
-  {
-    if (BanheiraLed_ON != nullptr) // Verifica se o ponteiro é nulo
-    {
-      return *BanheiraLed_ON; // Retorna o valor da variável
-    }
-    else
-    {
-      return -1; // Retorna -1 se o ponteiro for nulo
-    }
-  }
-
-  /// @brief Função getter para variável BanheiraLed_ON_viaEspNow acessada por ponteiro
-  /// @return 0 = false, 1 = true, -1 = ignorar
-  int getBanheiraLed_ON_viaEspNow()
-  {
-    if (BanheiraLed_ON_viaEspNow != nullptr) // Verifica se o ponteiro é nulo
-    {
-      return *BanheiraLed_ON_viaEspNow; // Retorna o valor da variável
-    }
-    else
-    {
-      return -1; // Retorna -1 se o ponteiro for nulo
-    }
-  }
-
-  /// @brief Função setter para variável BanheiraLed_ON acessada por ponteiro
-  /// @param value True/False
-  void setBanheiraLed_ON(bool value)
-  {
-    if (BanheiraLed_ON != nullptr) // Verifica se o ponteiro é nulo
-    {
-      *BanheiraLed_ON = value; // Modifica o valor da variável
-    }
-  }
-
-  /// @brief Função setter BanheiraLed_ON_viaEspNow para variável acessada por ponteiro
-  /// @param value True/False
-  void setBanheiraLed_ON_viaEspNow(bool value)
-  {
-    if (BanheiraLed_ON_viaEspNow != nullptr) // Verifica se o ponteiro é nulo
-    {
-      *BanheiraLed_ON_viaEspNow = value; // Modifica o valor da variável
-    }
-  }
-
-  void chamarLedBanheira(bool _alterar, bool _fromEspNow)
-  {
-    if (led_banheira)
-    {
-      led_banheira(_alterar, _fromEspNow); // Chama a função led_banheira via ponteiro
-    }
-  }
+  
 
   // ****************************************************
   // ***************** Auxiliares ***********************

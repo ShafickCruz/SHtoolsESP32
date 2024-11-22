@@ -23,8 +23,6 @@ namespace SHtoolsESP32
   int ledPin;
   int buttonPin;
   String nomeSketch;
-  static bool *BanheiraLed_ON = nullptr;           // Ponteiro para a variável
-  static bool *BanheiraLed_ON_viaEspNow = nullptr; // Ponteiro para a variável
   static funcao_led_banheira led_banheira;         // Ponteiro para a função
 
   // geral

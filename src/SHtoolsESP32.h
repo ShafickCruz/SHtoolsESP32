@@ -20,6 +20,8 @@
 namespace SHtoolsESP32
 {
     extern bool HabilitarDebug;
+    static bool *BanheiraLed_ON = nullptr;           // Ponteiro para a variável
+    static bool *BanheiraLed_ON_viaEspNow = nullptr; // Ponteiro para a variável
     typedef void (*funcao_led_banheira)(bool, bool); // Declaração do tipo de ponteiro para função
 
     void setup(int _ledPin, int _buttonPin, String _nomeSketch,

@@ -17,23 +17,14 @@
 #include <pgmspace.h> // Necessário para PROGMEM que esta sendo definido dentro dos arquivos binarios do webserver
 #include <esp_now.h>
 
-int getBanheiraLed_ON();
-int getBanheiraLed_ON_viaEspNow();
-void setBanheiraLed_ON(bool value);
-void setBanheiraLed_ON_viaEspNow(bool value);
-void chamarLedBanheira(bool _alterar, bool _fromEspNow); // Declaração de funções para usar os ponteiros
-static bool *BanheiraLed_ON = nullptr;                   // Ponteiro para a variável
-static bool *BanheiraLed_ON_viaEspNow = nullptr;         // Ponteiro para a variável
-typedef void (*funcao_led_banheira)(bool, bool);         // Declaração do tipo de ponteiro para função
-
+extern bool banheiraLed_ON;
+extern bool banheiraLed_ON_viaEspNow;
+extern void led_banheira(bool _alterar, bool _fromEspNow);
 namespace SHtoolsESP32
 {
     extern bool HabilitarDebug;
 
-    void setup(int _ledPin, int _buttonPin, String _nomeSketch,
-               bool *_BanheiraLed_ON = nullptr,
-               bool *_BanheiraLed_ON_viaEspNow = nullptr,
-               funcao_led_banheira _led_banheira = nullptr);
+    void setup(int _ledPin, int _buttonPin, String _nomeSketch);
 
     namespace Servidor
     {

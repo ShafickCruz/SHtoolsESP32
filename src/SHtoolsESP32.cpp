@@ -1,6 +1,5 @@
 #include "SHtoolsESP32.h"
-// Include ds arquivo de compartilhamento
-// #include "inline_banheiro.h"
+
 // Include dos arquivos binarios para o webserver
 #include "cmd_html.h"
 #include "favicon_ico.h"
@@ -11,66 +10,6 @@
 #include "serial_html.h"
 #include "sha_js.h"
 #include "style_css.h"
-
-
-static funcao_led_banheira led_banheira;         // Ponteiro para a função
-
-/// @brief Função getter para variável BanheiraLed_ON acessada por ponteiro
-  /// @return 0 = false, 1 = true, -1 = ignorar
-  int getBanheiraLed_ON()
-  {
-    if (BanheiraLed_ON != nullptr) // Verifica se o ponteiro é nulo
-    {
-      return *BanheiraLed_ON; // Retorna o valor da variável
-    }
-    else
-    {
-      return -1; // Retorna -1 se o ponteiro for nulo
-    }
-  }
-
-  /// @brief Função getter para variável BanheiraLed_ON_viaEspNow acessada por ponteiro
-  /// @return 0 = false, 1 = true, -1 = ignorar
-  int getBanheiraLed_ON_viaEspNow()
-  {
-    if (BanheiraLed_ON_viaEspNow != nullptr) // Verifica se o ponteiro é nulo
-    {
-      return *BanheiraLed_ON_viaEspNow; // Retorna o valor da variável
-    }
-    else
-    {
-      return -1; // Retorna -1 se o ponteiro for nulo
-    }
-  }
-
-  /// @brief Função setter para variável BanheiraLed_ON acessada por ponteiro
-  /// @param value True/False
-  void setBanheiraLed_ON(bool value)
-  {
-    if (BanheiraLed_ON != nullptr) // Verifica se o ponteiro é nulo
-    {
-      *BanheiraLed_ON = value; // Modifica o valor da variável
-    }
-  }
-
-  /// @brief Função setter BanheiraLed_ON_viaEspNow para variável acessada por ponteiro
-  /// @param value True/False
-  void setBanheiraLed_ON_viaEspNow(bool value)
-  {
-    if (BanheiraLed_ON_viaEspNow != nullptr) // Verifica se o ponteiro é nulo
-    {
-      *BanheiraLed_ON_viaEspNow = value; // Modifica o valor da variável
-    }
-  }
-
-  void chamarLedBanheira(bool _alterar, bool _fromEspNow)
-  {
-    if (led_banheira)
-    {
-      led_banheira(_alterar, _fromEspNow); // Chama a função led_banheira via ponteiro
-    }
-  }
-
 
 // ****************************************************
 // ****************** SHtoolsESP32 ********************
@@ -83,7 +22,6 @@ namespace SHtoolsESP32
   int ledPin;
   int buttonPin;
   String nomeSketch;
-  
 
   // geral
   bool WIFIradio_OFF = true;
@@ -102,20 +40,15 @@ namespace SHtoolsESP32
 
   // ****** IMPLEMENTAÇÃO
 
-  /// @brief
+  /// @brief Função para inicializar a biblioteca
   /// @param _ledPin
   /// @param _buttonPin
   /// @param _nomeSketch
-  void setup(int _ledPin, int _buttonPin, String _nomeSketch,
-             bool *_BanheiraLed_ON, bool *_BanheiraLed_ON_viaEspNow,
-             funcao_led_banheira _led_banheira)
+  void setup(int _ledPin, int _buttonPin, String _nomeSketch)
   {
     ledPin = _ledPin;
     buttonPin = _buttonPin;
     nomeSketch = _nomeSketch;
-    BanheiraLed_ON = _BanheiraLed_ON;
-    BanheiraLed_ON_viaEspNow = _BanheiraLed_ON_viaEspNow;
-    led_banheira = _led_banheira;
 
     // Configura os pinos de I/O
     pinMode(ledPin, OUTPUT);
@@ -159,7 +92,7 @@ namespace SHtoolsESP32
 
     // ****** IMPLEMENTAÇÃO
 
-    /// @brief
+    /// @brief Função para inicializar o servidor
     void init()
     {
       ServidorInicializado = true;
@@ -188,7 +121,7 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief
+    /// @brief Função de handle para processar as requisições de servidor
     void loop()
     {
       // DEBUG
@@ -314,7 +247,7 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief
+    /// @brief Função para processar as requisições quando estiver em ServerMod ON
     void ServerMod_handle()
     {
 
@@ -356,7 +289,7 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief
+    /// @brief Função para monitorar os processor de press do botão físico
     void bt_handle()
     {
       int currentButtonState = digitalRead(buttonPin); // Lê o estado atual do botão
@@ -392,8 +325,8 @@ namespace SHtoolsESP32
       lastButtonState = currentButtonState;
     }
 
-    /// @brief
-    /// @param _softRestart
+    /// @brief Função para iniciar o ServerMod ON
+    /// @param _softRestart Promover restart limpo se houver falha ao iniciar ServerMod ON?
     void startServerMod(bool _softRestart)
     {
       if (!ServerMod())
@@ -416,8 +349,8 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief
-    /// @return
+    /// @brief Funçao para promover o inicio de ServerMod ON
+    /// @return true/false = sucesso/falha nas inicializações
     bool ServerMod()
     {
       ServerMod_ON = false;
@@ -443,7 +376,7 @@ namespace SHtoolsESP32
       return true;
     }
 
-    /// @brief
+    /// @brief Função container para rotas/endpoints e callbacks utilizadas para ServerMod
     void rotasEcallbacks()
     {
       //
@@ -579,8 +512,8 @@ namespace SHtoolsESP32
                 { request->send_P(200, "image/x-icon", favicon_ico, favicon_ico_len); });
     }
 
-    /// @brief
-    /// @return
+    /// @brief Função para configurar e iniciar processos do WiFi
+    /// @return true/false = Sucesso ou falha nas inicialização/configurações
     bool WifiSetup()
     {
       // desconecta WiFi
@@ -621,8 +554,8 @@ namespace SHtoolsESP32
       return true;
     }
 
-    /// @brief
-    /// @return
+    /// @brief Função para retornar informaçoes da placa ESP32
+    /// @return String formato Json com informações da placa
     String obterInformacoesPlaca()
     {
       // Definindo a struct para armazenar as informações
@@ -726,7 +659,7 @@ namespace SHtoolsESP32
       return json;
     }
 
-    /// @brief
+    /// @brief Função principal na promoção do update de firmware via OTA
     /// @param request
     /// @param filename
     /// @param index
@@ -842,9 +775,9 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief Função para calcular o checksum completo após upload
+    /// @brief Função para calcular o checksum completo do arquivo de firmware recebido
     /// @param ctx
-    /// @return
+    /// @return String contendo rash sha256
     String OTA_FirmwareUpdate_ChecksumFinal(mbedtls_sha256_context *ctx)
     {
       uint8_t hash[32];
@@ -861,9 +794,9 @@ namespace SHtoolsESP32
       return checksumStr;
     }
 
-    /// @brief
-    /// @param _cmd
-    /// @return
+    /// @brief Função de reonhecimento de funções enviadas por serial monitor remoto
+    /// @param _cmd comando a ser reconhecido
+    /// @return true/false = comando reconhecido/não reonhecido
     bool SerialCMD(String _cmd)
     {
       // Verifica qual comando foi enviado
@@ -909,8 +842,8 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief
-    /// @return
+    /// @brief Função para gerar SSID com base no IP local fixo e o nome do sketch
+    /// @return char gerado para uso como SSID
     const char *gerarSSID()
     {
       static String result;
@@ -934,8 +867,7 @@ namespace SHtoolsESP32
     bool EspNowACK = false;                // Indica se a mensagem foi recebida pelo destinatário
     const String cmdIdentificador = "CMD"; // prefixo id de comando
     const char separador = '|';            // delimitador
-
-    struct Comando // Estrutura para armazenar informações dos comandos
+    struct Comando                         // Estrutura para armazenar informações dos comandos
     {
       bool executar;
       int cmd;
@@ -944,8 +876,8 @@ namespace SHtoolsESP32
       String argSTR;
     };
 
-    /// @brief
-    /// @return
+    /// @brief Função para inicializar EspNow
+    /// @return true/false = Sucesso/Falha nas inicializações
     bool EspNow_init()
     {
       if (!ServidorInicializado)
@@ -1052,13 +984,13 @@ namespace SHtoolsESP32
       return true;
     }
 
-    /// @brief
-    /// @param executar
-    /// @param comando
-    /// @param arg1
-    /// @param arg2
-    /// @param argSTR
-    /// @return
+    /// @brief Função para criar mensagem de comando de forma padronizada
+    /// @param executar 0/1 É um comando que gera execuções ou solicitações?
+    /// @param comando Número do comando
+    /// @param arg1 Argumento1 (int)
+    /// @param arg2 Argumento2 (int)
+    /// @param argSTR Argumento3 (Str)
+    /// @return String com mensagem formatada padronizada
     String criarMSGcomando(int executar, int comando, int arg1, int arg2, const char *argSTR)
     {
       const int maxLength = (250 - 1); // máximo suportado por EspNow (250). Menos 1 para o terminador nulo '\0'
@@ -1097,11 +1029,11 @@ namespace SHtoolsESP32
       return String(tempMsg);
     }
 
-    /// @brief Função para enviar dados com timeout e retorno de sucesso ou falha
-    /// @param peer
-    /// @param msg
-    /// @param ACK_timeout_ms
-    /// @return
+    /// @brief Função para enviar dados ao peer, com timeout e retorno de sucesso ou falha
+    /// @param peer mac do peer
+    /// @param msg mensagem padronizada a ser enviada
+    /// @param ACK_timeout_ms timeout com milisegundos
+    /// @return true/false = Sucesso/Falha de ENVIO
     bool EspNow_EnviarDados(uint8_t *peer, String msg, unsigned short ACK_timeout_ms)
     {
       // msg.c_str(): Converte a String para const char*.
@@ -1135,10 +1067,10 @@ namespace SHtoolsESP32
       return true;
     }
 
-    /// @brief Função de callback para receber os dados
-    /// @param peer
-    /// @param incomingData
-    /// @param len
+    /// @brief Função de callback para receber os dados enviados pelo peer
+    /// @param peer mac do peer que enviou a mensagem
+    /// @param incomingData dados recebidos
+    /// @param len tamanho dos dados recebidos
     void EspNow_CallbackReceber(const uint8_t *peer, const uint8_t *incomingData, int len)
     {
       /*
@@ -1202,9 +1134,9 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief Função para processar o comando
-    /// @param msgRecebida
-    /// @return
+    /// @brief Função para processar o comando recebido
+    /// @param msgRecebida mensagem de comando recebida
+    /// @return inteiro que representa uma resposta ao processamento
     int processarComando(const char *msgRecebida)
     {
       /*
@@ -1259,23 +1191,18 @@ namespace SHtoolsESP32
             {
               // Para solicitar a inversão do led da panheira, deve-se solicitar ao ESP32
               // da banheira, pois ele possui o controle direto sobre o rele que liga o led
-              // led_banheira(true, true); <-- não adequado para este escopo
+              led_banheira(true, true);
             }
             else
             {
               // recebido do esp32 da banheira/banheiro para atualizar os estados das variaveis
               // se o valor for nulo (-1 = nullptr) significa que a variável não esta sendo usada e deve ser ignorada
-              if (getBanheiraLed_ON() != -1)
-              {
-                Auxiliares::printDEBUG("BANHEIRA LED: " + String(*BanheiraLed_ON));
-                setBanheiraLed_ON(comando.arg1);
-              }
 
-              if (getBanheiraLed_ON_viaEspNow() != -1)
-              {
-                Auxiliares::printDEBUG("BANHEIRA LED: " + String(*BanheiraLed_ON_viaEspNow));
-                setBanheiraLed_ON_viaEspNow(comando.arg2);
-              }
+              Auxiliares::printDEBUG("BANHEIRA LED: " + String(banheiraLed_ON));
+              Auxiliares::printDEBUG("BANHEIRA LED: " + String(banheiraLed_ON_viaEspNow));
+
+              banheiraLed_ON = comando.arg1;
+              banheiraLed_ON_viaEspNow = comando.arg2;
             }
 
             return 1; // Sucesso
@@ -1290,10 +1217,10 @@ namespace SHtoolsESP32
       return -2;
     }
 
-    /// @brief Função para dividir a string com base no separador
-    /// @param str
-    /// @param sep
-    /// @param partes
+    /// @brief Função auxiliar a processarComando() para dividir a string e organizar as partes
+    /// @param str mensagem a ser dividida
+    /// @param sep separador utilizado
+    /// @param partes partes a serem organizadas
     void dividirString(const String &str, char sep, std::vector<String> &partes)
     {
       int startPos = 0;
@@ -1308,20 +1235,18 @@ namespace SHtoolsESP32
     }
   }
 
-  
-
   // ****************************************************
   // ***************** Auxiliares ***********************
   // ****************************************************
   namespace Auxiliares
   {
-    /// @brief Manipula <preferences.h> para escrita e leitura
+    /// @brief Função para manipular <preferences.h> em escrita,leitura e consulta
     /// @param _opcao -1 = monta _config se não estiver montado,
     /// 0 = cria ou obtem o valor,
     /// 1 = atualiza valor,
     /// 2 = obtém valor
     /// @param _chave Máximo 15 caracteres (14 + 1 terminador nulo '\0')
-    /// @param _valor bool
+    /// @param _valor valor a ser
     /// @return bool
     bool preferencias(int8_t _opcao, const char *_chave, bool _valor)
     {
@@ -1368,10 +1293,10 @@ namespace SHtoolsESP32
       return valorRetorno; // Atualiza a variável interna
     }
 
-    /// @brief Implementação de função para imprimir as informações em tela
-    /// @param _msg
-    /// @param newline
-    /// @param _debug
+    /// @brief Função para imprimir as informações em serial monitor local e remoto
+    /// @param _msg mensagem a ser impressa
+    /// @param newline imprimir em nova linha? (apenas local)
+    /// @param _debug é mensagem de debug?
     void printMSG(const String &_msg, bool newline, bool _debug)
     {
       String msg = _msg;
@@ -1411,8 +1336,8 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief
-    /// @param _msg
+    /// @brief Função para imprimir mensagens exclusivamente de debug
+    /// @param _msg mensagem a ser impressa
     void printDEBUG(String _msg)
     {
       if (HabilitarDebug)
@@ -1421,8 +1346,8 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief
-    /// @param ms
+    /// @brief Função para delay "assincrono" com uso de Yield()
+    /// @param ms tempo de delay em milisegundos
     void delayYield(unsigned long ms)
     {
       unsigned long start = millis();
@@ -1432,8 +1357,8 @@ namespace SHtoolsESP32
       }
     }
 
-    /// @brief Soft restart: Finaliza recusroso ativos e efetua restart do sistema
-    /// @param _tempoDelay Milesegundos (deafulr 1000)
+    /// @brief Função para restart limpo com finalização prévia de recusroso ativos
+    /// @param _tempoDelay tempo de delay antes do restart em milisegundos
     void ReiniciarESP(int _tempoDelay)
     {
       if (!WIFIradio_OFF)

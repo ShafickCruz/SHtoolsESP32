@@ -124,6 +124,8 @@ namespace SHtoolsESP32
     /// @brief Função de handle para processar as requisições de servidor
     void loop()
     {
+      yield();
+
       // DEBUG
       /*
       if (HabilitarDebug)
@@ -251,6 +253,7 @@ namespace SHtoolsESP32
     void ServerMod_handle()
     {
 
+      yield();
       // Verifica se havia solicitação de teste de novo firmware e o mesmo falhou
       // Retorna mensagem para web cliente
       if (Auxiliares::preferencias(2, PrefKey_fezRollback))
@@ -329,6 +332,8 @@ namespace SHtoolsESP32
     /// @param _softRestart Promover restart limpo se houver falha ao iniciar ServerMod ON?
     void startServerMod(bool _softRestart)
     {
+      yield();
+
       if (!ServerMod())
       {
         Auxiliares::printMSG("Falha ao iniciar modo servidor!", true);
@@ -353,6 +358,8 @@ namespace SHtoolsESP32
     /// @return true/false = sucesso/falha nas inicializações
     bool ServerMod()
     {
+      yield();
+
       ServerMod_ON = false;
 
       Auxiliares::printMSG("Entrando em modo Servidor...", true);

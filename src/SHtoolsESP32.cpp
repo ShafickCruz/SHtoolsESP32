@@ -870,6 +870,7 @@ namespace SHtoolsESP32
   namespace EspNow
   {
     bool EspNowHabilitado = false;         // marca como habilitado se esp_now_init() == ESP_OK
+    bool EspNowIniciado = false;           // carma se a biblioteca foi iniciada corretamente
     bool EspNowEnvioOK = false;            // a mensagem foi enviada? Não indica entregue.
     bool EspNowACK = false;                // Indica se a mensagem foi recebida pelo destinatário
     const String cmdIdentificador = "CMD"; // prefixo id de comando
@@ -911,7 +912,7 @@ namespace SHtoolsESP32
         if (esp_now_init() == ESP_OK) // tenta iniciar o espnow
         {
           esp_now_register_recv_cb(EspNow_CallbackReceber); // Define a função de callback para recebimento de dados
-          EspNowHabilitado = true;                          // define EspNow habilitado com base no resultado de init()
+          EspNowIniciado = true;                            // define EspNow iniciado com base no resultado de init()
           WIFIradio_OFF = false;
           break;
         }
@@ -920,13 +921,13 @@ namespace SHtoolsESP32
         if (i == 2)
         { // Terceira tentativa falha
           Auxiliares::printDEBUG("FALHA AO INICIALIZAR ESP-NOW");
-          EspNowHabilitado = false;
+          EspNowIniciado = false;
           return false;
         }
       }
 
       // Led aceso indica que EspNow está ativo; apagado indica desabilitado
-      digitalWrite(SHtoolsESP32::ledPin, EspNowHabilitado);
+      digitalWrite(SHtoolsESP32::ledPin, EspNowIniciado);
 
       return true;
     }
@@ -947,9 +948,9 @@ namespace SHtoolsESP32
     /// @return
     bool EspNow_adicionarPeer(const uint8_t *macAddress)
     {
-      if (!EspNowHabilitado)
+      if (!EspNowIniciado)
       {
-        Auxiliares::printMSG("EspNow está desabilitado ou não foi inicializado.", true);
+        Auxiliares::printMSG("EspNow não não foi inicializado?", true);
         return false;
       }
       esp_now_peer_info_t peerInfo;
@@ -958,10 +959,24 @@ namespace SHtoolsESP32
       // Adiciona o peer usando a API ESP-NOW
       if (esp_now_add_peer(&peerInfo) == ESP_OK)
       {
+        EspNowHabilitado = true;
         Auxiliares::printMSG("PEER adicionado com sucesso.", true);
       }
       else
       {
+        // Obtém o número de peers emparelhados
+        esp_now_peer_num_t peerNum;
+        esp_now_get_peer_num(&peerNum);
+
+        if (peerNum.total_num > 0)
+        {
+          EspNowHabilitado = true;
+        }
+        else
+        {
+          EspNowHabilitado = true;
+        }
+
         Auxiliares::printMSG("Falha ao adicionar PEER.", true);
         return false;
       }
@@ -973,14 +988,27 @@ namespace SHtoolsESP32
     /// @return
     bool EspNow_removerPeer(const uint8_t *macAddress)
     {
-      if (!EspNowHabilitado)
+      if (!EspNowIniciado)
       {
-        Auxiliares::printMSG("EspNow está desabilitado ou não foi inicializado.", true);
+        Auxiliares::printMSG("EspNow não não foi inicializado?", true);
         return false;
       }
 
       if (esp_now_del_peer(macAddress) == ESP_OK)
       {
+        // Obtém o número de peers emparelhados
+        esp_now_peer_num_t peerNum;
+        esp_now_get_peer_num(&peerNum);
+
+        if (peerNum.total_num > 0)
+        {
+          EspNowHabilitado = true;
+        }
+        else
+        {
+          EspNowHabilitado = false;
+        }
+
         Auxiliares::printMSG("PEER removido com sucesso.", true);
       }
       else

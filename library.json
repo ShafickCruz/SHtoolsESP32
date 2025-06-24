@@ -29,10 +29,16 @@
   "website": "https://github.com/ShafickCruz/SHtoolsESP32",
   "issues": "https://github.com/ShafickCruz/SHtoolsESP32/issues",
   "dependencies": {
-    "ESPAsyncWebServer": "file:./lib/ESP%20Async%20WebServer",
-    "AsyncTCP": "file:./lib/AsyncTCP"
+    "ESPAsyncWebServer": {
+      "path": "./lib/ESP Async WebServer",
+      "type": "local"
+    },
+    "AsyncTCP": {
+      "path": "./lib/AsyncTCP",
+      "type": "local"
+    }
   },
   "build": {
-    "flags": ["-I./lib/ESP%20Async%20WebServer/src", "-I./lib/AsyncTCP/src"]
+    "flags": ["-I\"lib/ESP Async WebServer/src\"", "-\"lib/AsyncTCP/src\""]
   }
 }

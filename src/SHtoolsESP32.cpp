@@ -1222,6 +1222,7 @@ namespace SHtoolsESP32
             return -3; // Possível erro - case 0
             break;
           case 1:
+#if defined(BANHEIRA) || defined(BANHEIRO)
             if (comando.executar) // ALTERAR/ATUALIZAR O ESTADO DA LUZ DA BANHEIRA
             {
               // Para solicitar a inversão do led da panheira, deve-se solicitar ao ESP32
@@ -1241,6 +1242,8 @@ namespace SHtoolsESP32
             }
 
             return 1; // Sucesso
+#endif
+            return 0; // Falha
 
           default:
             break;

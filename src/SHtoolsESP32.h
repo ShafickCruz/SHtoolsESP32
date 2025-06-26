@@ -17,9 +17,11 @@
 #include <pgmspace.h> // Necessário para PROGMEM que esta sendo definido dentro dos arquivos binarios do webserver
 #include <esp_now.h>
 
+#if defined(BANHEIRA) || defined(BANHEIRO)
 extern bool banheiraLed_ON;
 extern bool banheiraLed_ON_viaEspNow;
 extern void led_banheira(bool _alterar, bool _fromEspNow);
+#endif
 namespace SHtoolsESP32
 {
     extern bool HabilitarDebug;

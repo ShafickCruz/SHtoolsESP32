@@ -879,7 +879,6 @@ namespace SHtoolsESP32
     const char separador = '|';            // delimitador
     struct Comando                         // Estrutura para armazenar informações dos comandos
     {
-      bool executar;
       int cmd;
       int arg1;
       int arg2;
@@ -1022,19 +1021,18 @@ namespace SHtoolsESP32
     }
 
     /// @brief Função para criar mensagem de comando de forma padronizada
-    /// @param executar 0/1 É um comando que gera execuções ou solicitações?
     /// @param comando Número do comando
     /// @param arg1 Argumento1 (int)
     /// @param arg2 Argumento2 (int)
     /// @param argSTR Argumento3 (Str)
     /// @return String com mensagem formatada padronizada
-    String criarMSGcomando(int executar, int comando, int arg1, int arg2, const char *argSTR)
+    String criarMSGcomando(int comando, int arg1, int arg2, const char *argSTR)
     {
       const int maxLength = (250 - 1); // máximo suportado por EspNow (250). Menos 1 para o terminador nulo '\0'
       char tempMsg[250];
 
-      snprintf(tempMsg, sizeof(tempMsg), "%s%c%d%c%d%c%d%c%d%c%s",
-               cmdIdentificador.c_str(), separador, executar, separador,
+      snprintf(tempMsg, sizeof(tempMsg), "%s%c%d%c%d%c%d%c%s",
+               cmdIdentificador.c_str(), separador,
                comando, separador, arg1, separador, arg2, separador, argSTR);
 
       int totalLength = strlen(tempMsg);
@@ -1058,8 +1056,8 @@ namespace SHtoolsESP32
         truncatedArgSTR[newArgSTRLength] = '\0';
 
         // Formata novamente a mensagem com o argSTR cortado
-        snprintf(tempMsg, maxLength + 1, "%s%c%d%c%d%c%d%c%d%c%s", cmdIdentificador.c_str(),
-                 separador, executar, separador, comando, separador, arg1, separador, arg2,
+        snprintf(tempMsg, maxLength + 1, "%s%c%d%c%d%c%d%c%s", cmdIdentificador.c_str(),
+                 separador, comando, separador, arg1, separador, arg2,
                  separador, truncatedArgSTR);
       }
 
@@ -1111,7 +1109,7 @@ namespace SHtoolsESP32
     void EspNow_CallbackReceber(const uint8_t *peer, const uint8_t *incomingData, int len)
     {
       /*
-      id de comando|executar(0 ou 1)?|comando|arg1|arg2|argSTR
+      assinatura de comando|comando|arg1|arg2|argSTR
       valores -1 ou "" serão ignorados
       */
 
@@ -1177,7 +1175,7 @@ namespace SHtoolsESP32
     int processarComando(const char *msgRecebida)
     {
       /*
-      Formato esperado: CMD|executar|cmd|arg1|arg2|argSTR
+      Formato esperado: CMD|cmd|arg1|arg2|argSTR
       */
 
       String msgString(msgRecebida);
@@ -1194,8 +1192,8 @@ namespace SHtoolsESP32
           std::vector<String> partes;
           dividirString(restante, separador, partes);
 
-          // A mensagem deve ter pelo menos 5 partes
-          if (partes.size() < 5)
+          // A mensagem deve ter pelo menos 4 partes
+          if (partes.size() < 4)
           {
             SHtoolsESP32::Auxiliares::printDEBUG("ERRO -4: " + String(partes.size()));
             return -4; // Erro: número insuficiente de argumentos
@@ -1203,7 +1201,6 @@ namespace SHtoolsESP32
 
           // Preenche os dados do comando
           Comando comando;
-          comando.executar = partes[0].toInt();
           comando.cmd = partes[1].toInt();
           comando.arg1 = partes[2].toInt();
           comando.arg2 = partes[3].toInt();
@@ -1211,7 +1208,6 @@ namespace SHtoolsESP32
 
           // Logs de depuração dos argumentos parseados
           SHtoolsESP32::Auxiliares::printDEBUG("CMD: " + String(comando.cmd));
-          SHtoolsESP32::Auxiliares::printDEBUG("EXECUTAR: " + String(comando.executar));
           SHtoolsESP32::Auxiliares::printDEBUG("ARG1: " + String(comando.arg1));
           SHtoolsESP32::Auxiliares::printDEBUG("ARG2: " + String(comando.arg2));
           SHtoolsESP32::Auxiliares::printDEBUG("ARGSTR: " + String(comando.argSTR));
@@ -1223,7 +1219,7 @@ namespace SHtoolsESP32
           }
 
           // Chama o router e verifica execução real do handler
-          bool sucessoExecucao = cmd_rotas::route(comando.cmd, comando.executar, comando.arg1, comando.arg2, comando.argSTR);
+          bool sucessoExecucao = cmd_rotas::route(comando.cmd, comando.arg1, comando.arg2, comando.argSTR);
 
           if (sucessoExecucao)
           {

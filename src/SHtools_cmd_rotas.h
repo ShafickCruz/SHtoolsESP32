@@ -13,7 +13,7 @@ class cmd_rotas
 public:
     // Tipo da função que cada handler deve ter: executa comando com seus parâmetros
     // Agora retorna bool: true = ação concluída com sucesso; false = falha na execução
-    using Handler = std::function<bool(int executar, int arg1, int arg2, String argStr)>;
+    using Handler = std::function<bool(int arg1, int arg2, String argStr)>;
 
     // Registra um handler para o cmdId. Só permite se cmdId existir no catálogo central
     static int addHandler(int cmdId, Handler handler)
@@ -32,13 +32,13 @@ public:
 
     // Executa o handler correspondente ao cmdId, se registrado
     // Retorna true apenas se o handler existir e confirmar sucesso na execução
-    static bool route(int cmdId, int executar, int arg1, int arg2, String argStr)
+    static bool route(int cmdId, int arg1, int arg2, String argStr)
     {
         auto it = _handlers.find(cmdId);
         if (it != _handlers.end())
         {
-            bool sucesso = it->second(executar, arg1, arg2, argStr); // chama handler e obtém retorno
-            return sucesso;                                          // retorna resultado da execução real
+            bool sucesso = it->second(arg1, arg2, argStr); // chama handler e obtém retorno
+            return sucesso;                                // retorna resultado da execução real
         }
         else
         {

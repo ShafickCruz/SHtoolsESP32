@@ -19,13 +19,6 @@
 #include <pgmspace.h> // Necessário para PROGMEM que esta sendo definido dentro dos arquivos binarios do webserver
 #include <esp_now.h>
 #include "SHtools_cmd_rotas.h" // roteamento de comandos para usarem via espnow
-
-#if defined(BANHEIRA) || defined(BANHEIRO)
-extern bool banheiraLed_ON;
-extern bool banheiraLed_ON_viaEspNow;
-extern void led_banheira(bool _alterar, bool _fromEspNow);
-#endif
-
 namespace SHtoolsESP32
 {
     extern bool HabilitarDebug;
@@ -65,7 +58,7 @@ namespace SHtoolsESP32
         void EspNow_configurarPeer(esp_now_peer_info_t &peerInfo, const uint8_t *macAddress);
         bool EspNow_adicionarPeer(const uint8_t *macAddress);
         bool EspNow_removerPeer(const uint8_t *macAddress);
-        String criarMSGcomando(int executar, int comando, int arg1, int arg2, const char *argSTR);
+        String criarMSGcomando(int comando, int arg1, int arg2, const char *argSTR);
         bool EspNow_EnviarDados(uint8_t *peer, String msg, unsigned short ACK_timeout_ms = 3000);
         void EspNow_CallbackReceber(const uint8_t *peer, const uint8_t *incomingData, int len);
         int processarComando(const char *msgRecebida);

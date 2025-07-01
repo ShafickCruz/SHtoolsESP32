@@ -1,99 +1,61 @@
-# SHtoolsESP32
+# 📚 SHtoolsESP32 - Atualizado
 
-A biblioteca `SHtoolsESP32` permite que o ESP32 exiba remotamente as informações do serial monitor, receba atualizações de firmware via Wi-Fi em modo AP e se comunique com outros ESP através da tecnologia EspNow. 
+Este projeto fornece uma biblioteca para ESP32 com recursos integrados para:
 
-Com ela, você pode atualizar o firmware do seu dispositivo remotamente e permitir comunicação direta entre vários ESP32 sem rede Wi-Fi ou internet.
-
-## Recursos
-
-- **OTA via Wi-Fi (modo AP)**
-- **Servidor web assíncrono com ESPAsyncWebServer**
-- **Serial monitor remoto com envio de comandos**
-- **Comunicação direta com EspNow**
-- **Rollback e verificação de firmware**
-
-## Instalação
-
-### Usando PlatformIO
-
-Adicione ao `platformio.ini` do seu projeto:
-
-```ini
-lib_deps = https://github.com/ShafickCruz/SHtoolsESP32.git
-```
-
-> 📦 Todas as dependências (ESPAsyncWebServer, AsyncTCP etc.) já estão embutidas.  
-> Nenhuma outra biblioteca precisa ser instalada manualmente.
-
-
-## Instalação e dependências
-
-A partir desta versão, a instalação da biblioteca SHtoolsESP32 e suas dependências deve ser feita **manualmente** (ou via script).
-
-### Passos obrigatórios:
-
-1. **Baixe o repositório SHtoolsESP32** e coloque toda a pasta em `lib/` do seu projeto PlatformIO.
-
-2. **Copie as dependências AsyncTCP, ESPAsyncTCP e ESP Async WebServer** para dentro da pasta `lib/` do seu projeto.  
-   Todas essas dependências estão disponíveis em `lib/` dentro do próprio repositório SHtoolsESP32, podendo ser copiadas manualmente ou via script.
-
-3. (Opcional, recomendado) **Automatize o processo com o script `BaixarSHtools.py`**:
-    - O script está disponível em `tools/BaixarSHtools.py` dentro do repositório SHtoolsESP32.
-    - Copie `BaixarSHtools.py` para a pasta `tools/` do seu projeto PlatformIO.
-    - Adicione no `platformio.ini` do seu projeto:
-      ```
-      extra_scripts = 
-          pre:tools/BaixarSHtools.py
-      ```
-    - O script irá baixar o repositório SHtoolsESP32 e copiar as dependências automaticamente para `lib/` do projeto, **caso ainda não estejam presentes**.
-
-4. **Não utilize mais `lib_deps` para SHtoolsESP32 ou suas dependências**. O método recomendado é **sempre usar o código local**.
+✅ **WebServer OTA** (servidor para atualização de firmware)  
+✅ **Configurações persistentes** via Preferences  
+✅ **Comunicação P2P** entre ESPs via ESP-NOW  
+✅ **Roteamento centralizado de comandos** com verificação de validade via catálogo de comandos.
 
 ---
 
-## Resumo do novo fluxo
+## 🗂️ Arquivos principais
 
-- Apenas `lib/` do projeto principal importa.
-- O script facilita a instalação e atualização local.
-- Você tem total controle sobre as versões usadas, sem downloads automáticos inesperados.
-
----
-
-**Exemplo de configuração no platformio.ini**:
-```ini
-[env:esp32doit-devkit-v1]
-extra_scripts = 
-    pre:tools/BaixarSHtools.py
-framework = arduino
-platform = espressif32
-board = esp32doit-devkit-v1
-build_flags =
-    -Wall -Wextra
-    -D CONFIG_ARDUHAL_LOG_COLORS
-    -D CORE_DEBUG_LEVEL=ARDUHAL_LOG_LEVEL_DEBUG
-    -D VERSION_MACRO="1.1.1"
-    -I include
-monitor_speed = 115200
-monitor_filters = esp32_exception_decoder, log2file
-```
+- `SHtoolsESP32.h` + `SHtoolsESP32.cpp`: implementação do servidor OTA, EspNow, e funções auxiliares.
+- `SHtools_cmd_rotas.h` + `SHtools_cmd_rotas.cpp`: roteamento de comandos, com checagem de cmdId no catálogo oficial.
+- `SHtools_cmd.h`: catálogo fixo com a lista de comandos válidos para os dispositivos.
+- `main.cpp`: exemplo de sketch que usa SHtools, define handlers com `SHtoolsESP32::registrarComando()`.
 
 ---
 
-Para detalhes de uso da biblioteca, consulte os exemplos abaixo (sem alterações na API de uso).
+## 🚦 Como registrar um comando
 
-## Exemplo básico
+Em seu `setup()` do sketch:
 
 ```cpp
-#include <SHtoolsESP32.h>
-
-const int ledPin = 23;
-const int buttonPin = 27;
-
-void setup() {
-  SHtoolsESP32::setup(ledPin, buttonPin, "MeuSketch", nullptr, nullptr);
-}
-
-void loop() {
-  SHtoolsESP32::Servidor::loop();
-}
+SHtoolsESP32::registrarComando(1, [](int executar, int arg1, int arg2, String argStr) -> int {
+    if (executar) {
+        // executar ação real
+        return 1; // sucesso
+    }
+    return 0; // falha ou não executado
+});
 ```
+
+### Importante:
+- **`cmdId`** deve existir no catálogo em `SHtools_cmd.h`, senão registro falha.
+- `registrarComando()` agora retorna **1 (ok)** ou **0 (falha)**. Use este retorno para log ou tratamento no sketch.
+
+---
+
+## 📡 Como enviar comandos via ESP-NOW
+
+```cpp
+String msg = SHtoolsESP32::EspNow::criarMSGcomando(1, 1, 10, 0, "param");
+bool ok = SHtoolsESP32::EspNow::EspNow_EnviarDados(peerMac, msg);
+```
+
+---
+
+## 📬 Como receber comandos
+
+Quando outro ESP enviar um comando, será tratado por `EspNow_CallbackReceber()`, que chama internamente:
+- `processarComando()` → `cmd_rotas::route()` → handler registrado.
+- Resultado do handler define se mensagem foi processada com sucesso (1) ou falha (0).
+
+---
+
+## 🔎 Depuração
+
+- Use `Auxiliares::printDEBUG(...)` ou `Auxiliares::printMSG(...)`.
+- Ative/desative debug em runtime via comando `msgDEBUG` no WebSocket/Serial.

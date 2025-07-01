@@ -1,3 +1,5 @@
+// src/SHtoolsESP32.cpp
+
 #include "SHtoolsESP32.h"
 
 // Include dos arquivos binarios para o webserver
@@ -1147,7 +1149,7 @@ namespace SHtoolsESP32
         Auxiliares::printDEBUG("NUMERO INSUFICIENTE DE ARGUMENTOS. (-4)");
         break;
       case -3:
-        Auxiliares::printDEBUG("POSSÍVEL ERRO - CASE 0. (-3)");
+        Auxiliares::printDEBUG("POSSÍVEL ERRO - COMANDO 0. (-3)");
         break;
       case -2:
         Auxiliares::printDEBUG("SEM PREFIXO IDENTIFICADOR DE COMANDO. (-2)");
@@ -1175,32 +1177,31 @@ namespace SHtoolsESP32
     int processarComando(const char *msgRecebida)
     {
       /*
-      id de comando|executar(0 ou 1)?|comando|arg1|arg2|argSTR
-      valores -1 ou "" serão ignorados
+      Formato esperado: CMD|executar|cmd|arg1|arg2|argSTR
       */
 
       String msgString(msgRecebida);
 
-      // Verifica se há o identificador de comando no inicio da mensagem
+      // Verifica se há o identificador de comando no início da mensagem
       if (msgString.substring(0, cmdIdentificador.length()) == cmdIdentificador)
       {
-        // Verifica se após o identificador de comando há o caracter separador
+        // Verifica se após o identificador de comando há o caractere separador
         if (msgString.charAt(cmdIdentificador.length()) == separador)
         {
           String restante = msgString.substring(cmdIdentificador.length() + 1);
 
-          // Divida a mensagem usando o separador
+          // Divide a mensagem usando o separador
           std::vector<String> partes;
           dividirString(restante, separador, partes);
 
           // A mensagem deve ter pelo menos 5 partes
           if (partes.size() < 5)
           {
-            Auxiliares::printDEBUG("ERRO -4: " + String(partes.size()));
+            SHtoolsESP32::Auxiliares::printDEBUG("ERRO -4: " + String(partes.size()));
             return -4; // Erro: número insuficiente de argumentos
           }
 
-          // Preenchemos os dados do comando
+          // Preenche os dados do comando
           Comando comando;
           comando.executar = partes[0].toInt();
           comando.cmd = partes[1].toInt();
@@ -1208,51 +1209,40 @@ namespace SHtoolsESP32
           comando.arg2 = partes[3].toInt();
           comando.argSTR = partes[4];
 
-          Auxiliares::printDEBUG("EXECUTAR: " + String(comando.executar));
-          Auxiliares::printDEBUG("CMD: " + String(comando.cmd));
-          Auxiliares::printDEBUG("ARG1: " + String(comando.executar));
-          Auxiliares::printDEBUG("ARG2: " + String(comando.executar));
-          Auxiliares::printDEBUG("ARGSTR: " + String(comando.executar));
+          // Logs de depuração dos argumentos parseados
+          SHtoolsESP32::Auxiliares::printDEBUG("CMD: " + String(comando.cmd));
+          SHtoolsESP32::Auxiliares::printDEBUG("EXECUTAR: " + String(comando.executar));
+          SHtoolsESP32::Auxiliares::printDEBUG("ARG1: " + String(comando.arg1));
+          SHtoolsESP32::Auxiliares::printDEBUG("ARG2: " + String(comando.arg2));
+          SHtoolsESP32::Auxiliares::printDEBUG("ARGSTR: " + String(comando.argSTR));
 
-          // trata comandos
-          switch (comando.cmd)
+          // Verifica cmd inválido 0 (possível erro de parsing)
+          if (comando.cmd == 0)
           {
-          case 0:      // POSSIVEL ERRO
-                       // Algumas funções como atoi retornam zero quando encontram erro, por isto evito usar a case 0
-            return -3; // Possível erro - case 0
-            break;
-          case 1:
-#if defined(BANHEIRA) || defined(BANHEIRO)
-            if (comando.executar) // ALTERAR/ATUALIZAR O ESTADO DA LUZ DA BANHEIRA
-            {
-              // Para solicitar a inversão do led da panheira, deve-se solicitar ao ESP32
-              // da banheira, pois ele possui o controle direto sobre o rele que liga o led
-              led_banheira(true, true);
-            }
-            else
-            {
-              // recebido do esp32 da banheira/banheiro para atualizar os estados das variaveis
-              // se o valor for nulo (-1 = nullptr) significa que a variável não esta sendo usada e deve ser ignorada
+            return -3; // Erro: cmd zero reservado
+          }
 
-              Auxiliares::printDEBUG("BANHEIRA LED: " + String(banheiraLed_ON));
-              Auxiliares::printDEBUG("BANHEIRA LED: " + String(banheiraLed_ON_viaEspNow));
+          // Chama o router e verifica execução real do handler
+          bool sucessoExecucao = cmd_rotas::route(comando.cmd, comando.executar, comando.arg1, comando.arg2, comando.argSTR);
 
-              banheiraLed_ON = comando.arg1;
-              banheiraLed_ON_viaEspNow = comando.arg2;
-            }
-
-            return 1; // Sucesso
-#endif
-            return 0; // Falha
-
-          default:
-            break;
+          if (sucessoExecucao)
+          {
+            return 1; // Sucesso: handler executado corretamente
+          }
+          else
+          {
+            return 0; // Falha: handler inexistente ou execução retornou erro
           }
         }
-        return -1; // Erro: O formato da mensagem de comando é inválido
+        else
+        {
+          return -1; // Erro: identificador encontrado mas sem separador
+        }
       }
-
-      return -2;
+      else
+      {
+        return -2; // Erro: sem identificador de comando
+      }
     }
 
     /// @brief Função auxiliar a processarComando() para dividir a string e organizar as partes

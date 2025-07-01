@@ -1,3 +1,5 @@
+// src/SHtoolsESP32.h
+
 #ifndef SHtoolsESP32_H
 #define SHtoolsESP32_H
 
@@ -16,16 +18,25 @@
 #include <mbedtls/sha256.h>
 #include <pgmspace.h> // Necessário para PROGMEM que esta sendo definido dentro dos arquivos binarios do webserver
 #include <esp_now.h>
+#include "SHtools_cmd_rotas.h" // roteamento de comandos para usarem via espnow
 
 #if defined(BANHEIRA) || defined(BANHEIRO)
 extern bool banheiraLed_ON;
 extern bool banheiraLed_ON_viaEspNow;
 extern void led_banheira(bool _alterar, bool _fromEspNow);
 #endif
+
 namespace SHtoolsESP32
 {
     extern bool HabilitarDebug;
 
+    // Função para sketches registrarem handlers (rotas) de comandos
+    inline int registrarComando(int cmdId, cmd_rotas::Handler handler)
+    {
+        return cmd_rotas::addHandler(cmdId, handler);
+    }
+
+    // Função de inicialização da biblioteca
     void setup(int _ledPin, int _buttonPin, String _nomeSketch);
 
     namespace Servidor

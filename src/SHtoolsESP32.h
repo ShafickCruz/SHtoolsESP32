@@ -70,6 +70,7 @@ namespace SHtoolsESP32
         bool preferencias(int8_t _opcao, const char *_chave = "", bool _valor = false);
         void printMSG(const String &_msg, bool newline, bool _debug = false);
         void printDEBUG(String _msg);
+        void verificadorGenerico(unsigned long momentoInicial);
         void delayYield(unsigned long ms = 1000);
         void ReiniciarESP(int _tempoDelay = 1000);
     }

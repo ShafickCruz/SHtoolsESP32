@@ -1370,6 +1370,44 @@ namespace SHtoolsESP32
       }
     }
 
+    /// @brief Função para verificar o tempo de atividade do sistema e reiniciar se necessário
+    /// @param momentoInicial tempo inicial do sistema em milissegundos
+    /// Esta função verifica se o sistema está ativo por mais de uma semana ou se o ESP-NOW está desabilitado por mais de 12 horas.
+    /// Se qualquer uma dessas condições for verdadeira, o sistema é reiniciado.
+    /// @note Esta função deve ser chamada periodicamente no loop principal do programa.
+    /// @warning Certifique-se de que o momentoInicial seja definido corretamente no início do programa
+
+    void verificadorGenerico(unsigned long momentoInicial)
+    {
+      const unsigned long UMA_SEMANA_MS = 7UL * 24 * 60 * 60 * 1000; // 7 dias em milissegundos
+      const unsigned long DOZE_HORAS_MS = 12UL * 60 * 60 * 1000;     // 12 horas em milissegundos
+
+      static unsigned long espNowUltimaAtividade = millis();
+      unsigned long currentMillis = millis();
+
+      // 1 SEMANA - REINICIAR O SISTEMA
+      if ((currentMillis - momentoInicial) >= UMA_SEMANA_MS)
+      {
+        printMSG("Reiniciando o sistema após uma semana de operações contínuas.", true);
+        ReiniciarESP();
+      }
+
+      // 12 HORAS - REINICIAR O SISTEMA SE ESPNOW ESTIVER OFFLINE
+      if (!SHtoolsESP32::EspNow::EspNowHabilitado)
+      {
+        if ((currentMillis - espNowUltimaAtividade) >= DOZE_HORAS_MS)
+        {
+          printMSG("Reiniciando o sistema após 12 horas devido EspNow estar desabilitado.", true);
+          delayYield(1000);
+          ReiniciarESP(4000);
+        }
+      }
+      else
+      {
+        espNowUltimaAtividade = currentMillis; // renova quando EspNow está habilitado
+      }
+    }
+
     /// @brief Função para delay "assincrono" com uso de Yield()
     /// @param ms tempo de delay em milisegundos
     void delayYield(unsigned long ms)

@@ -1090,27 +1090,44 @@ namespace SHtoolsESP32
       return String(tempMsg);
     }
 
-    /// @brief Função para enviar dados ao peer, com timeout e retorno de sucesso ou falha
-    /// @param peer mac do peer
+    /// @brief Função para enviar dados via ESP-NOW
+    /// @details Esta função envia uma mensagem padronizada para um peer específico.
+    ///          A mensagem deve ser criada com a função criarMSGcomando() para garantir o
+    ///          formato correto. A função espera que o peer já esteja adicionado no mapa lógico e no ESP-NOW.
+    /// @note A função não verifica se o peer está online ou se a mensagem foi entregue.
+    /// @param nome nome do peer (deve estar cadastrado no mapa lógico)
     /// @param msg mensagem padronizada a ser enviada
-    /// @param ACK_timeout_ms timeout com milisegundos
+
     /// @return true/false = Sucesso/Falha de ENVIO
-    bool EspNow_EnviarDados(uint8_t *peer, String msg, unsigned short ACK_timeout_ms)
+    bool EspNow_EnviarDados(const String &nomePeer, const String &msg)
     {
-      // msg.c_str(): Converte a String para const char*.
-      // reinterpret_cast<const uint8_t*>: Converte o const char* para const uint8_t*, que é o formato esperado por esp_now_send.
+
+      // Busca o MAC do peer pelo nome
+      const uint8_t *mac = getMAC(nomePeer);
+      if (mac == nullptr)
+      {
+        Auxiliares::printDEBUG("PEER NÃO ENCONTRADO NA LISTA LÓGICA: " + nomePeer);
+        return false;
+      }
+
+      /* Converte a mensagem para bytes
+       * msg.c_str(): Converte a String para const char*.
+       * reinterpret_cast<const uint8_t*>: Converte o const char* para const uint8_t*, que é o formato esperado por esp_now_send.
+       * Isso é necessário porque esp_now_send espera um ponteiro para os dados a serem enviados.
+       */
       const uint8_t *data = reinterpret_cast<const uint8_t *>(msg.c_str());
+      size_t tamanho = msg.length();
 
       // Reseta as flags de status
       EspNowEnvioOK = false;
       EspNowACK = false; // alterada no callback de recebimento
 
       // Envia os dados via ESP-NOW
-      esp_err_t result = esp_now_send(peer, data, msg.length());
+      esp_err_t result = esp_now_send(mac, data, tamanho);
 
       if (result != ESP_OK)
       {
-        Auxiliares::printDEBUG("ERRO IMEDIATO AO TENTAR ENVIAR DADOS");
+        Auxiliares::printDEBUG("ERRO IMEDIATO AO TENTAR ENVIAR DADOS PARA PEER: " + nomePeer);
         return false;
       }
 

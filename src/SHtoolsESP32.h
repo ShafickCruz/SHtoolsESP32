@@ -60,7 +60,7 @@ namespace SHtoolsESP32
         // bool EspNow_adicionarPeer(const String &nome, const uint8_t mac[6]);
         bool EspNow_removerPeer(const uint8_t *macAddress);
         String criarMSGcomando(int comando, int arg1, int arg2, const char *argSTR);
-        bool EspNow_EnviarDados(uint8_t *peer, String msg, unsigned short ACK_timeout_ms = 3000);
+        bool EspNow_EnviarDados(const String &nomePeer, const String &msg);
         void EspNow_CallbackReceber(const uint8_t *peer, const uint8_t *incomingData, int len);
         int processarComando(const char *msgRecebida);
         void dividirString(const String &str, char sep, std::vector<String> &partes);

@@ -923,16 +923,19 @@ namespace SHtoolsESP32
         { // Terceira tentativa falha
           Auxiliares::printDEBUG("FALHA AO INICIALIZAR ESP-NOW");
           EspNowIniciado = false;
-          return false;
+          break;
+          ;
         }
       }
 
       // Led aceso indica que EspNow está ativo; apagado indica desabilitado
       digitalWrite(SHtoolsESP32::ledPin, EspNowIniciado);
 
-      return true;
+      SHtoolsESP32::EspNow::configurarEstado(EspNowIniciado); // Passar estado de espnow para arquivo auxiliar
+      return EspNowIniciado;
     }
 
+    /*
     /// @brief Função para configurar o peer
     /// @param peerInfo
     /// @param macAddress
@@ -943,47 +946,69 @@ namespace SHtoolsESP32
       peerInfo.channel = 1;                      // Canal definido no Wi-Fi
       peerInfo.encrypt = false;                  // Criptografia desabilitada
     }
+    */
 
-    /// @brief Função para adicionar um peer
-    /// @param macAddress
-    /// @return
-    bool EspNow_adicionarPeer(const uint8_t *macAddress)
+    /*
+    /// @brief Função para adicionar um peer no ESP-NOW
+    /// @param nome Nome do peer (String)
+    /// @param mac Endereço MAC do peer (array de 6 bytes)
+    /// @note Esta função verifica se o peer já existe no mapa lógico e no ESP-NOW.
+    ///       Se já existir, não adiciona novamente e retorna false.
+    ///       Se não existir, configura o peer e adiciona tanto no ESP-NOW quanto
+    ///       no mapa lógico de peers.
+    /// @return true/false = Sucesso/Falha na adição do peer
+    bool EspNow_adicionarPeer(const String &nome, const uint8_t mac[6])
     {
       if (!EspNowIniciado)
       {
         Auxiliares::printMSG("EspNow não não foi inicializado?", true);
         return false;
       }
+
+      // Verifica se já está no mapa lógico
+      const uint8_t *macExistente = SHtoolsESP32::EspNow::getPeer(nome);
+      if (macExistente)
+      {
+        Auxiliares::printMSG("ERRO: Peer já existente para este nome.", true);
+        return false;
+      }
+
+      // Verifica se já existe no ESP-NOW
+      if (esp_now_is_peer_exist(mac))
+      {
+        Auxiliares::printMSG("ERRO: Peer já existente para este MAC.", true);
+        return false;
+      }
+
+      // configura o peer
       esp_now_peer_info_t peerInfo;
-      EspNow_configurarPeer(peerInfo, macAddress);
+      EspNow_configurarPeer(peerInfo, mac);
 
       // Adiciona o peer usando a API ESP-NOW
       if (esp_now_add_peer(&peerInfo) == ESP_OK)
       {
-        EspNowHabilitado = true;
-        Auxiliares::printMSG("PEER adicionado com sucesso.", true);
+
+        // Adiciona o peer na lista lógica
+        int res = SHtoolsESP32::EspNow::addPeer(nome, mac);
+        if (res != 0)
+        {
+          Auxiliares::printMSG("Falha ao registrar peer na lista lógica.", true);
+          EspNow_removerPeer(mac); // Remove o peer se falhar ao registrar na lista lógica
+          return false;
+        }
       }
       else
       {
-        // Obtém o número de peers emparelhados
-        esp_now_peer_num_t peerNum;
-        esp_now_get_peer_num(&peerNum);
-
-        if (peerNum.total_num > 0)
-        {
-          EspNowHabilitado = true;
-        }
-        else
-        {
-          EspNowHabilitado = true;
-        }
 
         Auxiliares::printMSG("Falha ao adicionar PEER.", true);
         return false;
       }
+      Auxiliares::printMSG("PEER adicionado com sucesso.", true);
       return true;
     }
+    */
 
+    /*
     /// @brief Função para remover um peer
     /// @param macAddress
     /// @return
@@ -1019,6 +1044,7 @@ namespace SHtoolsESP32
       }
       return true;
     }
+  */
 
     /// @brief Função para criar mensagem de comando de forma padronizada
     /// @param comando Número do comando
@@ -1077,29 +1103,19 @@ namespace SHtoolsESP32
 
       // Reseta as flags de status
       EspNowEnvioOK = false;
-      EspNowACK = false;
+      EspNowACK = false; // alterada no callback de recebimento
 
       // Envia os dados via ESP-NOW
-      if (esp_now_send(peer, data, msg.length()) != ESP_OK)
+      esp_err_t result = esp_now_send(peer, data, msg.length());
+
+      if (result != ESP_OK)
       {
         Auxiliares::printDEBUG("ERRO IMEDIATO AO TENTAR ENVIAR DADOS");
         return false;
       }
 
       EspNowEnvioOK = true;
-
-      unsigned long tempoInicial = millis();
-      while (!EspNowACK) // alterada no callback de recebimento
-      {
-        if (((unsigned long)millis() - tempoInicial) >= (ACK_timeout_ms))
-        {
-          Auxiliares::printDEBUG("TIMEOUT: SEM RESPOSTA DO PEER.");
-          return false;
-        }
-        Auxiliares::delayYield(10);
-      }
-
-      return true;
+      return EspNowEnvioOK;
     }
 
     /// @brief Função de callback para receber os dados enviados pelo peer

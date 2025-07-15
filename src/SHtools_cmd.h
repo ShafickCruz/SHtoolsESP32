@@ -21,7 +21,8 @@ const cmd ComandosDisponiveis[] = {
     {4, "toREGAJARDIM_BACKEND_REGA1_ALTERAR_ESTADO", "Solicita alternância da rega 1 e envia tempo do ciclo"},
     {5, "toREGAJARDIM_BACKEND_REGA2_ALTERAR_ESTADO", "Solicita alternância da rega 2 e envia tempo do ciclo"},
     {6, "toREGAJARDIM_BACKEND_BOMBAFILTRO_ALTERAR_ESTADO", "Solicita alternância da bomba filtro e envia tempo do ciclo"},
-    {7, "fromREGAJARDIM_BACKEND_STATUS", "Informa o estado atual das regas, da bomba e os tempos restantes"}};
+    {7, "toREGAJARDIM_BACKEND_SOLICITAR_STATUS", "Frontend solicita explicitamente o status atual dos recursos"},
+    {8, "fromREGAJARDIM_BACKEND_STATUS", "Informa o estado atual das regas, da bomba e os tempos restantes"}};
 
 // Quantidade de comandos definidos, útil para iteração:
 const size_t QNT_COMANDOS_DISPONIVEIS = sizeof(ComandosDisponiveis) / sizeof(cmd);

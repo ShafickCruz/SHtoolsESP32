@@ -935,117 +935,6 @@ namespace SHtoolsESP32
       return EspNowIniciado;
     }
 
-    /*
-    /// @brief Função para configurar o peer
-    /// @param peerInfo
-    /// @param macAddress
-    void EspNow_configurarPeer(esp_now_peer_info_t &peerInfo, const uint8_t *macAddress)
-    {
-      memset(&peerInfo, 0, sizeof(peerInfo));
-      memcpy(peerInfo.peer_addr, macAddress, 6); // Copia o MAC do peer
-      peerInfo.channel = 1;                      // Canal definido no Wi-Fi
-      peerInfo.encrypt = false;                  // Criptografia desabilitada
-    }
-    */
-
-    /*
-    /// @brief Função para adicionar um peer no ESP-NOW
-    /// @param nome Nome do peer (String)
-    /// @param mac Endereço MAC do peer (array de 6 bytes)
-    /// @note Esta função verifica se o peer já existe no mapa lógico e no ESP-NOW.
-    ///       Se já existir, não adiciona novamente e retorna false.
-    ///       Se não existir, configura o peer e adiciona tanto no ESP-NOW quanto
-    ///       no mapa lógico de peers.
-    /// @return true/false = Sucesso/Falha na adição do peer
-    bool EspNow_adicionarPeer(const String &nome, const uint8_t mac[6])
-    {
-      if (!EspNowIniciado)
-      {
-        Auxiliares::printMSG("EspNow não não foi inicializado?", true);
-        return false;
-      }
-
-      // Verifica se já está no mapa lógico
-      const uint8_t *macExistente = SHtoolsESP32::EspNow::getPeer(nome);
-      if (macExistente)
-      {
-        Auxiliares::printMSG("ERRO: Peer já existente para este nome.", true);
-        return false;
-      }
-
-      // Verifica se já existe no ESP-NOW
-      if (esp_now_is_peer_exist(mac))
-      {
-        Auxiliares::printMSG("ERRO: Peer já existente para este MAC.", true);
-        return false;
-      }
-
-      // configura o peer
-      esp_now_peer_info_t peerInfo;
-      EspNow_configurarPeer(peerInfo, mac);
-
-      // Adiciona o peer usando a API ESP-NOW
-      if (esp_now_add_peer(&peerInfo) == ESP_OK)
-      {
-
-        // Adiciona o peer na lista lógica
-        int res = SHtoolsESP32::EspNow::addPeer(nome, mac);
-        if (res != 0)
-        {
-          Auxiliares::printMSG("Falha ao registrar peer na lista lógica.", true);
-          EspNow_removerPeer(mac); // Remove o peer se falhar ao registrar na lista lógica
-          return false;
-        }
-      }
-      else
-      {
-
-        Auxiliares::printMSG("Falha ao adicionar PEER.", true);
-        return false;
-      }
-      Auxiliares::printMSG("PEER adicionado com sucesso.", true);
-      return true;
-    }
-    */
-
-    /*
-    /// @brief Função para remover um peer
-    /// @param macAddress
-    /// @return
-    bool EspNow_removerPeer(const uint8_t *macAddress)
-    {
-      if (!EspNowIniciado)
-      {
-        Auxiliares::printMSG("EspNow não não foi inicializado?", true);
-        return false;
-      }
-
-      if (esp_now_del_peer(macAddress) == ESP_OK)
-      {
-        // Obtém o número de peers emparelhados
-        esp_now_peer_num_t peerNum;
-        esp_now_get_peer_num(&peerNum);
-
-        if (peerNum.total_num > 0)
-        {
-          EspNowHabilitado = true;
-        }
-        else
-        {
-          EspNowHabilitado = false;
-        }
-
-        Auxiliares::printMSG("PEER removido com sucesso.", true);
-      }
-      else
-      {
-        Auxiliares::printMSG("Falha ao remover PEER.", true);
-        return false;
-      }
-      return true;
-    }
-  */
-
     /// @brief Função para criar mensagem de comando de forma padronizada
     /// @param comando Número do comando
     /// @param arg1 Argumento1 (int)
@@ -1103,7 +992,7 @@ namespace SHtoolsESP32
     {
 
       // Busca o MAC do peer pelo nome
-      const uint8_t *mac = getMAC(nomePeer);
+      const uint8_t *mac = getMAC_Peer(nomePeer);
       if (mac == nullptr)
       {
         Auxiliares::printDEBUG("PEER NÃO ENCONTRADO NA LISTA LÓGICA: " + nomePeer);

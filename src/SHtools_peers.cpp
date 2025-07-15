@@ -35,16 +35,16 @@ namespace SHtoolsESP32
             info.encrypt = false;
         }
 
-        // ****************************************************
-        // ****************** FUNÇÕES PÚBLICAS ****************
-        // ****************************************************
-
         void configurarEstado(bool iniciado)
         {
             _espnowIniciado = iniciado;
         }
 
-        int registrar(const String &nome, const uint8_t mac[6])
+        // ****************************************************
+        // ****************** FUNÇÕES PÚBLICAS ****************
+        // ****************************************************
+
+        int registrarPeer(const String &nome, const uint8_t mac[6])
         {
             if (!_espnowIniciado)
             {
@@ -81,7 +81,7 @@ namespace SHtoolsESP32
             return 0;
         }
 
-        bool remover(const String &nome)
+        bool removerPeer(const String &nome)
         {
             auto it = _peers.find(nome);
             if (it == _peers.end())
@@ -94,12 +94,12 @@ namespace SHtoolsESP32
             return true;
         }
 
-        bool existe(const String &nome)
+        bool existePeer(const String &nome)
         {
             return _peers.find(nome) != _peers.end();
         }
 
-        const uint8_t *getMAC(const String &nome)
+        const uint8_t *getMAC_Peer(const String &nome)
         {
             auto it = _peers.find(nome);
             if (it == _peers.end())
@@ -108,7 +108,7 @@ namespace SHtoolsESP32
             return it->second.data();
         }
 
-        String listarJSON()
+        String listarPeer_JSON()
         {
             String json = "[";
             bool primeiro = true;

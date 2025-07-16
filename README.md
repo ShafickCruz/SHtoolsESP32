@@ -1,61 +1,126 @@
-# 📚 SHtoolsESP32 - Atualizado
 
-Este projeto fornece uma biblioteca para ESP32 com recursos integrados para:
+# SHtoolsESP32 - Biblioteca de Comunicação e Controle para ESP32
 
-✅ **WebServer OTA** (servidor para atualização de firmware)  
-✅ **Configurações persistentes** via Preferences  
-✅ **Comunicação P2P** entre ESPs via ESP-NOW  
-✅ **Roteamento centralizado de comandos** com verificação de validade via catálogo de comandos.
+## Visão Geral
 
----
+A **SHtoolsESP32** é uma biblioteca modular que provê suporte a:
 
-## 🗂️ Arquivos principais
-
-- `SHtoolsESP32.h` + `SHtoolsESP32.cpp`: implementação do servidor OTA, EspNow, e funções auxiliares.
-- `SHtools_cmd_rotas.h` + `SHtools_cmd_rotas.cpp`: roteamento de comandos, com checagem de cmdId no catálogo oficial.
-- `SHtools_cmd.h`: catálogo fixo com a lista de comandos válidos para os dispositivos.
-- `main.cpp`: exemplo de sketch que usa SHtools, define handlers com `SHtoolsESP32::registrarComando()`.
+- Comunicação entre ESP32 via **ESP-NOW**
+- Controle remoto via comandos padronizados (protocolo SHtools)
+- Registro e gerenciamento de **Peers**
+- Servidor Web integrado (OTA, debug, info)
+- Watchdog e verificação de comunicação
+- Utilitários auxiliares para debug, delay cooperativo, reinício etc.
 
 ---
 
-## 🚦 Como registrar um comando
+## Estrutura dos Comandos
 
-Em seu `setup()` do sketch:
+### Formato de Mensagem
+
+```
+assinatura|comando|arg1|arg2|argSTR
+```
+
+- **assinatura**: identificador (normalmente o nome do módulo)
+- **comando**: número do comando
+- **arg1**, **arg2**: inteiros (pode ser -1 para ignorar)
+- **argSTR**: string com parâmetros (pode ser "" se não usado)
+
+### Registro de Comandos
 
 ```cpp
-SHtoolsESP32::registrarComando(1, [](int executar, int arg1, int arg2, String argStr) -> int {
-    if (executar) {
-        // executar ação real
-        return 1; // sucesso
-    }
-    return 0; // falha ou não executado
+SHtoolsESP32::registrarComando(3, [](int arg1, int arg2, String argStr) -> bool
+{
+    // Processa comando
+    return true; // Sucesso
 });
 ```
 
-### Importante:
-- **`cmdId`** deve existir no catálogo em `SHtools_cmd.h`, senão registro falha.
-- `registrarComando()` agora retorna **1 (ok)** ou **0 (falha)**. Use este retorno para log ou tratamento no sketch.
-
 ---
 
-## 📡 Como enviar comandos via ESP-NOW
+## Envio de Comandos
+
+### Criação da Mensagem
 
 ```cpp
-String msg = SHtoolsESP32::EspNow::criarMSGcomando(1, 1, 10, 0, "param");
-bool ok = SHtoolsESP32::EspNow::EspNow_EnviarDados(peerMac, msg);
+String msg = SHtoolsESP32::EspNow::criarMSGcomando(comando, arg1, arg2, "param");
+```
+
+### Envio da Mensagem
+
+```cpp
+SHtoolsESP32::EspNow::EspNow_EnviarDados("nomePeer", msg);
 ```
 
 ---
 
-## 📬 Como receber comandos
+## Gerenciamento de Peers
 
-Quando outro ESP enviar um comando, será tratado por `EspNow_CallbackReceber()`, que chama internamente:
-- `processarComando()` → `cmd_rotas::route()` → handler registrado.
-- Resultado do handler define se mensagem foi processada com sucesso (1) ou falha (0).
+A lib possui um sistema interno de peers com identificação por nome.
+
+### Funções principais
+
+| Função | Descrição |
+|---|---|
+| `registrarPeer(nome, mac)` | Adiciona ou substitui peer |
+| `removerPeer(nome)` | Remove peer pelo nome |
+| `existePeer(nome)` | Verifica se o peer existe |
+| `getMAC_Peer(nome)` | Retorna o MAC do peer |
+| `listarPeer_JSON()` | Retorna JSON com os peers atuais |
+
+Os peers são armazenados em Preferences e persistem após reboot.
 
 ---
 
-## 🔎 Depuração
+## Catálogo de Comandos Padrão
 
-- Use `Auxiliares::printDEBUG(...)` ou `Auxiliares::printMSG(...)`.
-- Ative/desative debug em runtime via comando `msgDEBUG` no WebSocket/Serial.
+| Comando | Descrição |
+|---|---|
+| 1 | toBANHEIRA_SOLICITAR_ESTADO_LED |
+| 2 | toBANHEIRA_ALTERAR_ESTADO_LED |
+| 3 | fromBANHEIRA_ESTADO_LED_ATUALIZADO |
+| 4 | toREGAJARDIM_BACKEND_REGA1_ALTERAR_ESTADO |
+| 5 | toREGAJARDIM_BACKEND_REGA2_ALTERAR_ESTADO |
+| 6 | toREGAJARDIM_BACKEND_BOMBAFILTRO_ALTERAR_ESTADO |
+| 7 | fromREGAJARDIM_BACKEND_STATUS |
+| 8 | toREGAJARDIM_SOLICITAR_STATUS |
+
+---
+
+## Servidor Web Integrado
+
+- Acesso a debug e logs via HTTP
+- Suporte a OTA (opcional)
+- Monitoramento remoto
+
+---
+
+## Utilitários Auxiliares
+
+| Função | Descrição |
+|---|---|
+| `printDEBUG(msg)` | Print em caixa alta via serial |
+| `delayYield(ms)` | Delay cooperativo sem travar loop |
+| `ReiniciarESP()` | Reinicia o ESP32 |
+| `verificadorGenerico()` | Watchdog padrão (tempo, ESP-NOW, etc) |
+| `preferencias(namespace, chave, valor)` | Escreve/ler Preferences de forma facilitada |
+
+---
+
+## Arquitetura
+
+```
+SHtoolsESP32/
+├── SHtoolsESP32.cpp / .h
+├── SHtools_cmd_rotas.cpp / .h
+├── SHtools_peers.cpp / .h
+```
+
+---
+
+## Autor
+
+Shafick Cruz  
+Julho/2025
+

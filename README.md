@@ -1,4 +1,3 @@
-
 # SHtoolsESP32 - Biblioteca de Comunicação e Controle para ESP32
 
 ## Visão Geral
@@ -61,13 +60,13 @@ A lib possui um sistema interno de peers com identificação por nome.
 
 ### Funções principais
 
-| Função | Descrição |
-|---|---|
-| `registrarPeer(nome, mac)` | Adiciona ou substitui peer |
-| `removerPeer(nome)` | Remove peer pelo nome |
-| `existePeer(nome)` | Verifica se o peer existe |
-| `getMAC_Peer(nome)` | Retorna o MAC do peer |
-| `listarPeer_JSON()` | Retorna JSON com os peers atuais |
+| Função                     | Descrição                        |
+| -------------------------- | -------------------------------- |
+| `registrarPeer(nome, mac)` | Adiciona ou substitui peer       |
+| `removerPeer(nome)`        | Remove peer pelo nome            |
+| `existePeer(nome)`         | Verifica se o peer existe        |
+| `getMAC_Peer(nome)`        | Retorna o MAC do peer            |
+| `listarPeer_JSON()`        | Retorna JSON com os peers atuais |
 
 Os peers são armazenados em Preferences e persistem após reboot.
 
@@ -75,16 +74,16 @@ Os peers são armazenados em Preferences e persistem após reboot.
 
 ## Catálogo de Comandos Padrão
 
-| Comando | Descrição |
-|---|---|
-| 1 | toBANHEIRA_SOLICITAR_ESTADO_LED |
-| 2 | toBANHEIRA_ALTERAR_ESTADO_LED |
-| 3 | fromBANHEIRA_ESTADO_LED_ATUALIZADO |
-| 4 | toREGAJARDIM_BACKEND_REGA1_ALTERAR_ESTADO |
-| 5 | toREGAJARDIM_BACKEND_REGA2_ALTERAR_ESTADO |
-| 6 | toREGAJARDIM_BACKEND_BOMBAFILTRO_ALTERAR_ESTADO |
-| 7 | fromREGAJARDIM_BACKEND_STATUS |
-| 8 | toREGAJARDIM_SOLICITAR_STATUS |
+| Comando | Descrição                                       |
+| ------- | ----------------------------------------------- |
+| 1       | toBANHEIRA_SOLICITAR_ESTADO_LED                 |
+| 2       | toBANHEIRA_ALTERAR_ESTADO_LED                   |
+| 3       | fromBANHEIRA_ESTADO_LED_ATUALIZADO              |
+| 4       | toREGAJARDIM_BACKEND_REGA1_ALTERAR_ESTADO       |
+| 5       | toREGAJARDIM_BACKEND_REGA2_ALTERAR_ESTADO       |
+| 6       | toREGAJARDIM_BACKEND_BOMBAFILTRO_ALTERAR_ESTADO |
+| 7       | fromREGAJARDIM_BACKEND_STATUS                   |
+| 8       | toREGAJARDIM_SOLICITAR_STATUS                   |
 
 ---
 
@@ -98,12 +97,12 @@ Os peers são armazenados em Preferences e persistem após reboot.
 
 ## Utilitários Auxiliares
 
-| Função | Descrição |
-|---|---|
-| `printDEBUG(msg)` | Print em caixa alta via serial |
-| `delayYield(ms)` | Delay cooperativo sem travar loop |
-| `ReiniciarESP()` | Reinicia o ESP32 |
-| `verificadorGenerico()` | Watchdog padrão (tempo, ESP-NOW, etc) |
+| Função                                  | Descrição                                   |
+| --------------------------------------- | ------------------------------------------- |
+| `printDEBUG(msg)`                       | Print em caixa alta via serial              |
+| `delayYield(ms)`                        | Delay cooperativo sem travar loop           |
+| `ReiniciarESP()`                        | Reinicia o ESP32                            |
+| `verificadorGenerico()`                 | Watchdog padrão (tempo, ESP-NOW, etc)       |
 | `preferencias(namespace, chave, valor)` | Escreve/ler Preferences de forma facilitada |
 
 ---
@@ -115,6 +114,7 @@ SHtoolsESP32/
 ├── SHtoolsESP32.cpp / .h
 ├── SHtools_cmd_rotas.cpp / .h
 ├── SHtools_peers.cpp / .h
+├── SHtools_cmd.h
 ```
 
 ---
@@ -123,4 +123,3 @@ SHtoolsESP32/
 
 Shafick Cruz  
 Julho/2025
-

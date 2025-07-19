@@ -44,24 +44,33 @@ namespace SHtoolsESP32
         // ****************** FUNÇÕES PÚBLICAS ****************
         // ****************************************************
 
+        /**
+         * @brief Inicializa o EspNow e configura o callback de recebimento
+         * @param nome Nome do peer a ser registrado
+         * @param mac Endereço MAC do peer a ser registrado
+         * @details Esta função registra um novo peer no ESP-NOW.
+         * @note O ESP-NOW deve estar iniciado antes de registrar um peer.
+         * @note O peer deve ser adicionado no mapa lógico antes de enviar dados.
+         * @return 1 sucesso, 0 falha ao adicionar no ESP-NOW, -1 ESP-NOW não iniciado, -2 peer já existe no mapa lógico, -3 peer já existe no ESP-NOW
+         */
         int registrarPeer(const String &nome, const uint8_t mac[6])
         {
             if (!_espnowIniciado)
             {
-                Auxiliares::printDEBUG("ESP-NOW não iniciado. Não é possível registrar peer.");
-                return -3;
+                Auxiliares::printDEBUG("ESP-NOW NÃO INICIADO. NÃO É POSSÍVEL REGISTRAR PEER.");
+                return -1; // erro: espnow não iniciado
             }
 
             if (_peers.find(nome) != _peers.end())
             {
-                Auxiliares::printDEBUG("Peer já registrado no mapa lógico: " + nome);
-                return -1;
+                Auxiliares::printDEBUG("PEER JÁ REGISTRADO NO MAPA LÓGICO: " + nome);
+                return -2; // erro: peer já existe
             }
 
             if (esp_now_is_peer_exist(mac))
             {
-                Auxiliares::printDEBUG("Peer já registrado no ESP-NOW (MAC duplicado).");
-                return -1;
+                Auxiliares::printDEBUG("PEER JÁ REGISTRADO NO ESP-NOW (MAC DUPLICADO).");
+                return -3; // erro: peer já existe no esp_now
             }
 
             esp_now_peer_info_t peerInfo;
@@ -69,16 +78,16 @@ namespace SHtoolsESP32
 
             if (esp_now_add_peer(&peerInfo) != ESP_OK)
             {
-                Auxiliares::printDEBUG("Falha ao adicionar peer no ESP-NOW.");
-                return -2;
+                Auxiliares::printDEBUG("FALHA AO ADICIONAR PEER NO ESP-NOW.");
+                return 0; // erro: falha ao adicionar peer no esp_now
             }
 
             std::array<uint8_t, 6> macArr;
             memcpy(macArr.data(), mac, 6);
             _peers[nome] = macArr;
 
-            Auxiliares::printDEBUG("Peer registrado com sucesso: " + nome);
-            return 0;
+            Auxiliares::printDEBUG("PEER REGISTRADO COM SUCESSO: " + nome);
+            return 1; // sucesso
         }
 
         bool removerPeer(const String &nome)

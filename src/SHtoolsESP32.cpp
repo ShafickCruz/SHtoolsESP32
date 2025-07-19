@@ -928,11 +928,14 @@ namespace SHtoolsESP32
         }
       }
 
-      // Led aceso indica que EspNow está ativo; apagado indica desabilitado
-      digitalWrite(SHtoolsESP32::ledPin, EspNowIniciado);
+      // EspNowHabilitado é para uso dos sketchs e EspNowIniciado é para uso interno
+      EspNowHabilitado = EspNowIniciado;
 
-      SHtoolsESP32::EspNow::configurarEstado(EspNowIniciado); // Passar estado de espnow para arquivo auxiliar
-      return EspNowIniciado;
+      // Led aceso indica que EspNow está ativo; apagado indica desabilitado
+      digitalWrite(SHtoolsESP32::ledPin, EspNowHabilitado);
+
+      SHtoolsESP32::EspNow::configurarEstado(EspNowHabilitado); // Passar estado de espnow para arquivo auxiliar
+      return EspNowHabilitado;
     }
 
     /// @brief Função para criar mensagem de comando de forma padronizada

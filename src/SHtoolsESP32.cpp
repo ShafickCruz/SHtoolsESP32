@@ -1126,10 +1126,10 @@ namespace SHtoolsESP32
 
           // Preenche os dados do comando
           Comando comando;
-          comando.cmd = partes[1].toInt();
-          comando.arg1 = partes[2].toInt();
-          comando.arg2 = partes[3].toInt();
-          comando.argSTR = partes[4];
+          comando.cmd = partes[0].toInt();
+          comando.arg1 = partes[1].toInt();
+          comando.arg2 = partes[2].toInt();
+          comando.argSTR = partes[3];
 
           // Logs de depuração dos argumentos parseados
           SHtoolsESP32::Auxiliares::printDEBUG("CMD: " + String(comando.cmd));
